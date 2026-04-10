@@ -1,56 +1,84 @@
 {% extends "layout.html" %}
 
+{% block title %}Inicio | NeuroDetect{% endblock %}
+{% block page_heading %}Panel de análisis clínico{% endblock %}
+
 {% block main %}
-    <div class="profile aligned">
-        <div class="outer_layer">
-            {% if user["picture"] %}
-                <img class="profile_picture" src="/static/uploads/{{ user['picture'] }}" alt="profile picture">
-            {% else %}
-                <img class="profile_picture" src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png" alt="default profile picture">
-            {% endif %}
+
+<section class="grid-two">
+    <article class="card card-highlight">
+        <h2>Cargar informe PDF</h2>
+        <p class="section-text">
+            Sube un documento clínico en PDF para ejecutar el análisis preliminar mediante el modelo.
+        </p>
+
+        <form action="/" method="POST" enctype="multipart/form-data" class="upload-form">
+            <label for="pdf" class="form-label">Selecciona un archivo</label>
+            <input id="pdf" type="file" name="pdf" accept="application/pdf" required>
+
+            <button type="submit" class="primary-button">Procesar documento</button>
+        </form>
+    </article>
+
+    <article class="card">
+        <h2>Resumen del flujo</h2>
+        <ul class="feature-list">
+            <li>Carga segura del documento</li>
+            <li>Procesamiento automático en backend</li>
+            <li>Extracción y análisis del contenido</li>
+            <li>Presentación estructurada del resultado</li>
+        </ul>
+    </article>
+</section>
+
+{% if resultado %}
+<section class="card result-card">
+    <h2>Resultado del análisis</h2>
+    <div class="result-grid">
+        <div class="result-item">
+            <span class="result-label">Archivo</span>
+            <span class="result-value">{{ resultado.nombre_archivo }}</span>
         </div>
-        <div class="profile_text">
-            <h2 class="profile_name">{{ user["username"] }}</h2>
-            {% if user["bio"] %}
-                <p class="text-muted text_adjusted">{{ user["bio"] }}</p>
-            {% else %}
-                <p class="mb-5 small text-center text-muted">Still without a biography!</p>
-            {% endif %}
-
-            <div class="aligned">
-                <form action="/edit_profile" method="GET">
-                    <button class="btn btn-secondary btn_separation" type="submit">Edit Profile</button>
-                </form>
-                <form action="/logout">
-                    <button class="btn btn-info btn_separation">Log Out</button>
-                </form>
-            </div>
-
+        <div class="result-item">
+            <span class="result-label">Estado</span>
+            <span class="result-value">{{ resultado.mensaje }}</span>
+        </div>
+        <div class="result-item">
+            <span class="result-label">Predicción</span>
+            <span class="result-value result-emphasis">{{ resultado.prediccion }}</span>
         </div>
     </div>
+</section>
+{% endif %}
 
-    <hr class="profile-hr">
+{% if error %}
+<section class="card error-card">
+    <h2>Incidencia</h2>
+    <p>{{ error }}</p>
+</section>
+{% endif %}
 
-    <div class="albums">
-        {% if albums | length > 0 %}
+<section class="grid-three">
+    <article class="card">
+        <h3>Enfoque clínico</h3>
+        <p class="section-text">
+            Diseñado para integrarse en un flujo de revisión documental orientado a apoyo diagnóstico.
+        </p>
+    </article>
 
-            {% for album in albums %}
-                <div class="album" data-id="{{ album['id'] }}">
-                    <img class="album_portrait" src="/static/uploads/{{ album['portrait'] }}" alt="album portrait">
-                    <h3 class="album_title text_adjusted">{{ album['title'] }}</h3>
-                    <p class="date">{{ album['date_of_creation'] }}</p>
-                    <hr>
-                    <p class="text-muted small text_adjusted">{{ album['description'] }}</p>
-                </div>
-            {% endfor %}
+    <article class="card">
+        <h3>Trazabilidad</h3>
+        <p class="section-text">
+            La plataforma puede ampliarse para registrar resultados, versiones del modelo y auditoría.
+        </p>
+    </article>
 
-        {% else %}
+    <article class="card">
+        <h3>Escalabilidad</h3>
+        <p class="section-text">
+            La arquitectura permite incorporar nuevos modelos, validaciones y tipos de documento.
+        </p>
+    </article>
+</section>
 
-            <div class="aligned">
-                <img class="background_img" src="https://nyatelier.es/storage/2018/05/Question-mark-blackandwhite.png" alt="not albums yet?">
-            </div>
-
-        {% endif %}
-    </div>
-
-{% endblock %
+{% endblock %}

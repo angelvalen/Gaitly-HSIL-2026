@@ -1,132 +1,110 @@
-import os
-
-from datetime import datetime
-from flask import Flask, flash, redirect, render_template, request, session
-from flask_session import Session
-from werkzeug.security import check_password_hash, generate_password_hash
-from helpers import login_required, invalid
 import sqlite3
+from flask import Flask, render_template, request, redirect, session, flash
+from werkzeug.security import generate_password_hash, check_password_hash
 
-conn = sqlite3.connect("database.db")
-cursor = conn.cursor()
-
-# Configure application
 app = Flask(__name__)
+app.secret_key = "cambia_esto_por_una_clave_secreta"
 
-# Configure session to use filesystem (instead of signed cookies)
-app.config["SESSION_PERMANENT"] = False
-app.config["SESSION_TYPE"] = "filesystem"
-Session(app)
-
-# Configure SQL
-conn = sqlite3.connect("data/base.db")
-cursor = conn.cursor()
-
-@app.after_request
-def after_request(response):
-    """Ensure responses aren't cached"""
-    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
-    response.headers["Expires"] = 0
-    response.headers["Pragma"] = "no-cache"
-    return response
-
-# Session
-
-@app.route("/login", methods=["GET", "POST"])
-def login():
-    """Log user in"""
-
-    # Forget any user_id
-    session.clear()
-
-    # User reached route via POST (as by submitting a form via POST)
-    if request.method == "POST":
-        # Ensure username was submitted
-        if not request.form.get("username"):
-            return render_template("login.html", message="Please provide username")
-
-        # Ensure password was submitted
-        elif not request.form.get("password"):
-            return render_template("login.html", message="Please provide password")
-
-        # Query database for username
-        rows = cursor.execute(
-            "SELECT * FROM users WHERE username = ?", request.form.get("username")
-        )
-
-        # Ensure username exists and password is correct
-        if len(rows) != 1 or not check_password_hash(
-            rows[0]["hash"], request.form.get("password")
-        ):
-            return render_template("login.html", message="Wrong password or username")
-
-        # Remember which user has logged in
-        session["user_id"] = rows[0]["id"]
-
-        # Redirect user to home page
-        return redirect("/")
-
-    # User reached route via GET (as by clicking a link or via redirect)
-    else:
-        return render_template("login.html")
+DB_PATH = "users.db"
 
 
-@app.route("/logout")
-def logout():
-    """Log user out"""
+def get_db_connection():
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    return conn
 
-    # Forget any user_id
-    session.clear()
 
-    # Redirect user to login form
-    return redirect("/")
+@app.route("/")
+def index():
+    user = None
+
+    if "user_id" in session:
+        conn = get_db_connection()
+        user = conn.execute(
+            "SELECT id, username, email FROM users WHERE id = ?",
+            (session["user_id"],)
+        ).fetchone()
+        conn.close()
+
+    return render_template("index.html", user=user)
 
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
-    """Register user"""
     if request.method == "POST":
-        # Ensure username was submitted
-        username = request.form.get("username")
-        password = request.form.get("password")
-        confirmation = request.form.get("confirmation")
-        db_usernames = cursor.execute("SELECT username FROM users")
+        username = request.form.get("username", "").strip()
+        email = request.form.get("email", "").strip()
+        password = request.form.get("password", "")
+        confirmation = request.form.get("confirmation", "")
 
-        # Ensure correct username
-        if not username:
-            return render_template("register.html", message="Please provide username")
-        if len(username) > 10:
-            return render_template("register.html", message="Username max length is 10 characters")
-        for person in db_usernames:
-            if person["username"] == username:
-                return render_template("register.html", message="Username already taken")
+        if not username or not email or not password or not confirmation:
+            flash("Todos los campos son obligatorios.")
+            return render_template("register.html")
 
-        # Ensure password was submitted
-        if not password or not confirmation:
-            return render_template("register.html", message="Please provide password")
-
-        # Ensure password was confrimed
         if password != confirmation:
-            return render_template("register.html", message="Pasword and confirmation dont match")
+            flash("Las contraseñas no coinciden.")
+            return render_template("register.html")
 
-        # Ensure password has 8+ letters, numbers and symbols
-        if invalid(password):
-            return render_template("register.html", message="Password must have 8 or more character and must contain numbers and symbols")
+        password_hash = generate_password_hash(password)
 
-        cursor.execute(
-            "INSERT INTO users (username, hash) VALUES (?, ?)",
-            username,
-            generate_password_hash(password),
+        conn = get_db_connection()
+        existing_user = conn.execute(
+            "SELECT id FROM users WHERE username = ? OR email = ?",
+            (username, email)
+        ).fetchone()
+
+        if existing_user:
+            conn.close()
+            flash("Ese usuario o email ya existe.")
+            return render_template("register.html")
+
+        conn.execute(
+            "INSERT INTO users (username, email, password_hash) VALUES (?, ?, ?)",
+            (username, email, password_hash)
         )
+        conn.commit()
+        conn.close()
+
+        flash("Registro completado. Ya puedes iniciar sesión.")
+        return redirect("/login")
+
+    return render_template("register.html")
+
+
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    if request.method == "POST":
+        username = request.form.get("username", "").strip()
+        password = request.form.get("password", "")
+
+        if not username or not password:
+            flash("Debes completar usuario y contraseña.")
+            return render_template("login.html")
+
+        conn = get_db_connection()
+        user = conn.execute(
+            "SELECT * FROM users WHERE username = ?",
+            (username,)
+        ).fetchone()
+        conn.close()
+
+        if user is None or not check_password_hash(user["password_hash"], password):
+            flash("Usuario o contraseña incorrectos.")
+            return render_template("login.html")
+
+        session["user_id"] = user["id"]
+        flash("Sesión iniciada correctamente.")
         return redirect("/")
-    else:
-        return render_template("register.html")
 
-# Execution
+    return render_template("login.html")
 
-@app.route("/")
-@login_required
-def index():
-        user = cursor.execute("SELECT username, bio, picture FROM users WHERE id = ?", session["user_id"])[0]
-        albums = cursor.execute("SELECT * FROM albums WHERE user_id = ? ORDER BY date_of_creation DESC", session["user_id"])
-        return render_template("index.html", user=user, albums=albums)
+
+@app.route("/logout")
+def logout():
+    session.clear()
+    flash("Has cerrado sesión.")
+    return redirect("/")
+
+
+if __name__ == "__main__":
+    app.run(debug=True)
