@@ -1,0 +1,56 @@
+{% extends "layout.html" %}
+
+{% block main %}
+    <div class="profile aligned">
+        <div class="outer_layer">
+            {% if user["picture"] %}
+                <img class="profile_picture" src="/static/uploads/{{ user['picture'] }}" alt="profile picture">
+            {% else %}
+                <img class="profile_picture" src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png" alt="default profile picture">
+            {% endif %}
+        </div>
+        <div class="profile_text">
+            <h2 class="profile_name">{{ user["username"] }}</h2>
+            {% if user["bio"] %}
+                <p class="text-muted text_adjusted">{{ user["bio"] }}</p>
+            {% else %}
+                <p class="mb-5 small text-center text-muted">Still without a biography!</p>
+            {% endif %}
+
+            <div class="aligned">
+                <form action="/edit_profile" method="GET">
+                    <button class="btn btn-secondary btn_separation" type="submit">Edit Profile</button>
+                </form>
+                <form action="/logout">
+                    <button class="btn btn-info btn_separation">Log Out</button>
+                </form>
+            </div>
+
+        </div>
+    </div>
+
+    <hr class="profile-hr">
+
+    <div class="albums">
+        {% if albums | length > 0 %}
+
+            {% for album in albums %}
+                <div class="album" data-id="{{ album['id'] }}">
+                    <img class="album_portrait" src="/static/uploads/{{ album['portrait'] }}" alt="album portrait">
+                    <h3 class="album_title text_adjusted">{{ album['title'] }}</h3>
+                    <p class="date">{{ album['date_of_creation'] }}</p>
+                    <hr>
+                    <p class="text-muted small text_adjusted">{{ album['description'] }}</p>
+                </div>
+            {% endfor %}
+
+        {% else %}
+
+            <div class="aligned">
+                <img class="background_img" src="https://nyatelier.es/storage/2018/05/Question-mark-blackandwhite.png" alt="not albums yet?">
+            </div>
+
+        {% endif %}
+    </div>
+
+{% endblock %
