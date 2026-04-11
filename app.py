@@ -157,7 +157,7 @@ def statistics():
 
     
     metrics = conn.execute(
-        "SELECT * FROM tests WHERE user_id = ?",
+        "SELECT * FROM tests WHERE user_id = ? ORDER BY date DESC",
         (session["user_id"],)
     ).fetchall()
     conn.close()
