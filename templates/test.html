@@ -3,110 +3,356 @@
 {% block title %}Nuevo Test | CIPN Gait Analyzer{% endblock %}
 
 {% block main %}
-<div class="test-container fade-in">
+<div id="loading-overlay" class="loading-overlay" style="display: none;">
+  <div class="live-overlay-shell">
     
+    <section class="card live-countdown-card">
+      <div class="gauge-container live-gauge">
+        <svg class="gauge-svg" viewBox="0 0 100 100">
+          <circle class="gauge-bg" cx="50" cy="50" r="42" stroke-width="4" fill="none"
+                  style="stroke: rgba(255,255,255,0.05);" />
+          <circle id="progress-bar" class="gauge-fill" cx="50" cy="50" r="42" stroke-width="4" fill="none"
+                  style="--score: 0; stroke: var(--accent-blue); transition: stroke-dashoffset 1s linear;" />
+        </svg>
+        <div class="gauge-text">
+          <span id="timer-display" class="score-val" style="font-size: 3rem;">30</span>
+          <span class="score-label">SECONDS REMAINING</span>
+        </div>
+      </div>
+
+      <h2 class="live-title">Capturing Live Motion Data</h2>
+      <p class="live-subtitle">
+        Real-time monitoring of incoming IMU buffers from the mobile device.
+      </p>
+
+      <div class="live-status-line">
+        <span class="status-badge"><span class="pulse"></span> Acquisition Active</span>
+      </div>
+    </section>
+
+    <section class="card live-signal-card">
+      <div class="card-header">
+        <span class="label">LIVE IMU PREVIEW</span>
+      </div>
+
+      <div class="live-chart-wrapper">
+        <canvas id="liveSignalChart"></canvas>
+      </div>
+
+      <div class="live-metrics-grid">
+        <article class="live-mini-stat">
+          <span class="label">ACC SAMPLES</span>
+          <div id="acc-count" class="metric-value">0</div>
+        </article>
+        <article class="live-mini-stat">
+          <span class="label">GYRO SAMPLES</span>
+          <div id="gyro-count" class="metric-value">0</div>
+        </article>
+        <article class="live-mini-stat">
+          <span class="label">FS EST.</span>
+          <div id="fs-est" class="metric-value">-- <small>Hz</small></div>
+        </article>
+        <article class="live-mini-stat">
+          <span class="label">STREAM</span>
+          <div id="stream-state" class="metric-status status-normal">Receiving</div>
+        </article>
+      </div>
+
+      <div id="live-status-text" class="live-footnote">
+        Waiting for enough samples to complete the analysis window.
+      </div>
+    </section>
+
+  </div>
+</div>
+
+<div class="test-container fade-in" id="main-test-content">
     <header class="dashboard-header">
         <div class="header-info">
             <h1>New Walking Assessment</h1>
             <span class="status-badge"><span class="pulse"></span> System Ready for Data</span>
         </div>
         <div class="header-meta">
-            <span class="ai-tag">Motion Analysis Module</span>
+            <a href="/" class="btn-secondary" style="padding: 0.5rem 1rem; font-size: 0.75rem;">← Back to Dashboard</a>
         </div>
     </header>
 
     <div class="test-layout-grid">
-        <section class="test-form-section">
-            <div class="card upload-card">
-                <div class="card-header">
-                    <span class="label">Step 1: Upload Data</span>
-                </div>
-                
-                <form action="/test" method="post" enctype="multipart/form-data" class="upload-form">
-                    <div class="drop-zone" id="drop-zone">
-                        <div class="upload-icon">
-                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--accent-blue)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                                <polyline points="17 8 12 3 7 8"></polyline>
-                                <line x1="12" y1="3" x2="12" y2="15"></line>
-                            </svg>
-                        </div>
-                        <p class="insight-text">Drag and drop your gait sensor data or click to browse</p>
-                        <span class="timestamp">Supported formats: .CSV, .JSON, .TXT</span>
-                        <input type="file" name="file" id="fileInput" hidden>
-                    </div>
-
-                    <!-- Notes input -->
-                    <div class="card" style="margin-top: 20px;">
-                        <div class="card-header">
-                            <span class="label">CLINICAL NOTES</span>
-                        </div>
-                    <div 
-                        id="notes-editor"
-                        class="notes-editor"
-                        contenteditable="true"
-                        data-placeholder="Add optional observations (e.g. patient fatigue, imbalance, pain...)"
-                    ></div>
-                        <!-- hidden input REAL que se envía -->
-                        <input type="hidden" name="notas" id="notas-hidden">
-                    </div>
-
-                    <div class="form-actions">
-                        <button type="submit" class="btn-primary w-100">
-                            <span class="icon">╂</span> Analyze Walking Pattern
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </section>
-
-        <aside class="test-instructions-section">
-            <div class="decorative-graphic">
-                <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-                    <path fill="var(--accent-blue)" fill-opacity="0.03" d="M44.7,-76.4C58.1,-69.2,69.2,-57.4,76.4,-43.9C83.6,-30.4,86.9,-15.2,85.1,-0.9C83.4,13.3,76.6,26.7,68.2,38.2C59.8,49.7,49.8,59.3,38,67.6C26.2,75.9,13.1,82.9,-0.8,84.4C-14.7,85.8,-29.4,81.7,-42.6,74.1C-55.8,66.5,-67.5,55.4,-75.4,42.2C-83.3,29,-87.3,13.7,-85.7,-1C-84.1,-15.7,-76.9,-29.8,-67.7,-41.8C-58.5,-53.8,-47.3,-63.7,-34.7,-71.4C-22.1,-79.1,-11.1,-84.6,2.5,-88.9C16.1,-93.2,31.3,-83.6,44.7,-76.4Z" transform="translate(100 100)" />
-                </svg>
-            </div>
-
+        <section class="test-instructions-section">
             <div class="card instructions-card">
                 <div class="card-header">
-                    <span class="label">Testing Protocol</span>
+                    <span class="label">Clinical Protocol</span>
                 </div>
-                <h3>Preparation Guide</h3>
+                <h3>Preparation & Safety Guide</h3>
+                <p class="insight-text" style="margin-bottom: 1.5rem;">Please follow these steps to ensure clinical-grade data quality before starting the assessment.</p>
+                
                 <ul class="instruction-list">
                     <li>
                         <span class="list-num">01</span>
-                        <p>Ensure the wearable sensors are securely fastened to the <strong>mid-foot</strong> area.</p>
-                    </li>
-                    <li>
-                        <span class="list-num">02</span>
-                        <p>Walk on a flat surface at your <strong>natural pace</strong> for at least 30 seconds.</p>
+                        <p><strong>Sensor Placement:</strong> Verify that the application is functioning correctly and introduce the phone in your back pocket.</p>
                     </li>
                     <li>
                         <span class="list-num">03</span>
-                        <p>Keep the smartphone within 3 meters to maintain a stable <strong>Bluetooth connection</strong>.</p>
+                        <p><strong>Path Clearance:</strong> Ensure a straight, unobstructed walking path of 10+ meters and back.</p>
                     </li>
                     <li>
                         <span class="list-num">04</span>
-                        <p>Avoid talking or sudden head movements during the data collection phase.</p>
+                        <p><strong>Execution:</strong> Natural pace. Recording time: <strong>30 seconds</strong>.</p>
                     </li>
                 </ul>
+            </div>
+        </section>
+
+        <aside class="test-form-section">
+            <div class="card execution-card">
+                <div class="card-header">
+                    <span class="label">Test Execution</span>
+                </div>
+                
+                <form action="/test" method="post" class="upload-form" id="testForm">
+                    <div class="sensor-status-panel" style="background: rgba(255,255,255,0.02); padding: 1.5rem; border-radius: 8px; border: 1px solid var(--border-subtle); margin-bottom: 2rem;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                            <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600; letter-spacing: 0.05em;">LINK STATUS</span>
+                            <span class="status-badge" style="background: rgba(40, 167, 69, 0.1); color: var(--safe); border: 1px solid var(--safe); font-size: 0.7rem;">CALIBRATED & READY</span>
+                        </div>
+                        <div style="height: 4px; background: var(--border-subtle); border-radius: 2px; overflow: hidden;">
+                            <div class="pulse" style="height: 100%; width: 100%; background: var(--safe); border-radius: 0;"></div>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn-primary w-100" style="padding: 1.5rem; font-size: 1.1rem; letter-spacing: 0.02em;">
+                            <span class="icon">⏵</span> Start Data Capture
+                        </button>
+                    </div>
+                </form>
             </div>
         </aside>
     </div>
 </div>
 
+<style>
+    /* Estilos para la animación de carga */
+    .loading-overlay {
+        position: fixed;
+        top: 0; left: 0; width: 100%; height: 100%;
+        background: var(--bg-dark);
+        z-index: 9999;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+    }
+
+    .loader-content {
+        animation: fadeIn 0.5s ease-out;
+    }
+
+    .gauge-fill {
+        stroke-dasharray: 264; /* 2 * PI * 42 */
+        stroke-dashoffset: 264;
+        transform: rotate(-90deg);
+        transform-origin: 50% 50%;
+    }
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    // Simple script to handle file selection visual
-    const dropZone = document.getElementById('drop-zone');
-    const fileInput = document.getElementById('fileInput');
+const testForm = document.getElementById('testForm');
+const overlay = document.getElementById('loading-overlay');
+const timerDisplay = document.getElementById('timer-display');
+const progressBar = document.getElementById('progress-bar');
 
-    dropZone.onclick = () => fileInput.click();
+const accCount = document.getElementById('acc-count');
+const gyroCount = document.getElementById('gyro-count');
+const fsEst = document.getElementById('fs-est');
+const streamState = document.getElementById('stream-state');
+const liveStatusText = document.getElementById('live-status-text');
 
-    fileInput.onchange = () => {
-        if(fileInput.files.length > 0) {
-            dropZone.querySelector('.insight-text').innerText = "File ready: " + fileInput.files[0].name;
-            dropZone.style.borderColor = "var(--safe)";
+let liveChart = null;
+let pollingInterval = null;
+let countdownInterval = null;
+
+function initLiveChart() {
+    const canvas = document.getElementById('liveSignalChart');
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    const gradient = ctx.createLinearGradient(0, 0, 0, 280);
+    gradient.addColorStop(0, 'rgba(74, 144, 226, 0.22)');
+    gradient.addColorStop(1, 'rgba(74, 144, 226, 0.00)');
+
+    liveChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: [],
+            datasets: [
+                {
+                    label: 'Acceleration magnitude',
+                    data: [],
+                    borderColor: '#4a90e2',
+                    backgroundColor: gradient,
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.35,
+                    pointRadius: 0
+                },
+                {
+                    label: 'Gyroscope magnitude',
+                    data: [],
+                    borderColor: 'rgba(255,255,255,0.55)',
+                    borderWidth: 1.4,
+                    fill: false,
+                    tension: 0.3,
+                    pointRadius: 0
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            animation: false,
+            plugins: {
+                legend: {
+                    display: true,
+                    labels: { color: '#8e9db0', boxWidth: 10 }
+                }
+            },
+            scales: {
+                x: {
+                    grid: { display: false },
+                    ticks: { display: false }
+                },
+                y: {
+                    grid: { color: 'rgba(255,255,255,0.05)' },
+                    ticks: { color: '#5f738c', font: { size: 10 } }
+                }
+            }
         }
-    };
+    });
+}
+
+function startCountdown(totalTime = 30) {
+    let timeLeft = totalTime;
+    timerDisplay.innerText = totalTime;
+
+    countdownInterval = setInterval(() => {
+        timeLeft--;
+        timerDisplay.innerText = Math.max(timeLeft, 0);
+
+        const progress = ((totalTime - timeLeft) / totalTime) * 100;
+        const offset = 264 - (264 * progress) / 100;
+        progressBar.style.strokeDashoffset = offset;
+
+        if (timeLeft <= 0) {
+            clearInterval(countdownInterval);
+        }
+    }, 1000);
+}
+
+async function apiStart() {
+    const res = await fetch('/api/live-start', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+    });
+    if (!res.ok) throw new Error('No se pudo iniciar la captura');
+    return await res.json();
+}
+
+async function apiPreview() {
+    const res = await fetch('/api/live-preview');
+    if (!res.ok) throw new Error('No se pudo leer la preview');
+    return await res.json();
+}
+
+async function apiFinish() {
+    const res = await fetch('/api/live-finish', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+    });
+    if (!res.ok) throw new Error('No se pudo finalizar el análisis');
+    return await res.json();
+}
+
+function startPolling() {
+    pollingInterval = setInterval(async () => {
+        try {
+            const payload = await apiPreview();
+
+            if (accCount) accCount.textContent = payload.acc_samples ?? 0;
+            if (gyroCount) gyroCount.textContent = payload.gyro_samples ?? 0;
+            if (fsEst) fsEst.innerHTML = `${payload.fs_est ?? '--'} <small>Hz</small>`;
+
+            if (streamState) {
+                streamState.textContent = payload.measuring ? 'Receiving' : 'Idle';
+                streamState.className = payload.measuring
+                    ? 'metric-status status-normal'
+                    : 'metric-status status-warning';
+            }
+
+            if (liveStatusText) {
+                liveStatusText.textContent = payload.message || 'Receiving live sensor buffers from mobile device.';
+            }
+
+            if (liveChart) {
+                liveChart.data.labels = payload.labels || [];
+                liveChart.data.datasets[0].data = payload.acc_mag || [];
+                liveChart.data.datasets[1].data = payload.gyr_mag || [];
+                liveChart.update('none');
+            }
+        } catch (err) {
+            if (streamState) {
+                streamState.textContent = 'Error';
+                streamState.className = 'metric-status status-alert';
+            }
+            if (liveStatusText) {
+                liveStatusText.textContent = 'No se ha podido actualizar la señal en vivo.';
+            }
+        }
+    }, 100);
+}
+
+async function runLiveCapture() {
+    overlay.style.display = 'flex';
+    document.getElementById('main-test-content').style.opacity = '0.08';
+
+    if (!liveChart) initLiveChart();
+
+    await apiStart();
+    startCountdown(30);
+    startPolling();
+
+    setTimeout(async () => {
+        try {
+            clearInterval(pollingInterval);
+            clearInterval(countdownInterval);
+
+            if (liveStatusText) {
+                liveStatusText.textContent = 'Finalizando adquisición y ejecutando inferencia...';
+            }
+
+            const result = await apiFinish();
+
+            if (result.redirect_url) {
+                window.location.href = result.redirect_url;
+            } else {
+                window.location.href = '/';
+            }
+        } catch (err) {
+            if (streamState) {
+                streamState.textContent = 'Failed';
+                streamState.className = 'metric-status status-alert';
+            }
+            if (liveStatusText) {
+                liveStatusText.textContent = 'Error en el análisis final.';
+            }
+        }
+    }, 30000);
+}
+
+testForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    await runLiveCapture();
+});
 </script>
 {% endblock %}

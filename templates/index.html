@@ -11,8 +11,7 @@
             <span class="status-badge"><span class="pulse"></span> Gait Monitoring Active</span>
         </div>
         <div class="header-meta">
-            <span class="ai-tag">AI Analysis Engine v2.4</span>
-            <span class="timestamp">Last updated: 5 min ago</span>
+            <span class="header-info">Welcome back, {{ user["username"] }}</span>
         </div>
     </header>
 
@@ -23,8 +22,7 @@
             <div class="card-header">
                 <span class="label">CIPN RISK SCORE</span>
             </div>
-            {% set score = score|default(72) %}
-            <div class="gauge-container" style="--score: {{ score }};">
+                {% set score = (metrics[0]['target_prob'] * 100) | round if metrics else 0 %}            <div class="gauge-container" style="--score: {{ score }};">
                 <svg viewBox="0 0 100 100" class="gauge-svg">
                     <circle class="gauge-bg" cx="50" cy="50" r="42"></circle>
                     <circle class="gauge-fill {% if score < 30 %}safe{% elif score <= 70 %}warning{% else %}alert{% endif %}" cx="50" cy="50" r="42"></circle>
@@ -59,38 +57,63 @@
     </div>
 
     <!-- 2. TREND OVER TIME -->
-    <section class="card trend-panel">
-        <div class="card-header">
-            <span class="label">RISK EVOLUTION</span>
-        </div>
-        <div class="chart-wrapper">
-            <canvas id="trendChart"></canvas>
-        </div>
-    </section>
-
-    <!-- 4. KEY METRICS GRID -->
-    <div class="metrics-grid">
-        <article class="card">
-            <span class="label">CADENCE</span>
-            <div class="metric-value">104 <small>steps/min</small></div>
-            <div class="metric-status status-normal">Within range</div>
-        </article>
-        <article class="card">
-            <span class="label">SYMMETRY</span>
-            <div class="metric-value">82.1 <small>%</small></div>
-            <div class="metric-status status-warning">-4.2% vs last test</div>
-        </article>
-        <article class="card">
-            <span class="label">VARIABILITY</span>
-            <div class="metric-value">5.8 <small>%</small></div>
-            <div class="metric-status status-alert">Above threshold</div>
-        </article>
-        <article class="card">
-            <span class="label">STEP LENGTH</span>
-            <div class="metric-value">0.62 <small>m</small></div>
-            <div class="metric-status status-normal">Stable</div>
-        </article>
+<section class="card trend-panel">
+    <div class="card-header">
+        <span class="label">RISK EVOLUTION</span>
     </div>
+
+    <div class="trend-table-wrapper" style="overflow-x: auto; margin-top: 1rem;">
+        <h3 style="margin-bottom: 1rem;">Test History</h3>
+
+        <table style="width: 100%; border-collapse: collapse; text-align: left;">
+            <thead>
+                <tr style="border-bottom: 1px solid var(--border-subtle); color: var(--text-muted); font-size: 0.85rem;">
+                    <th style="padding: 12px;">Date</th>
+                    <th style="padding: 12px;">CIPN Probability</th>
+                    <th style="padding: 12px;">State</th>
+                </tr>
+            </thead>
+            <tbody style="font-size: 0.9rem;">
+                {% for m in metrics %}
+                <tr style="border-bottom: 1px solid var(--border-subtle);">
+                    <td style="padding: 12px;">{{ m['date'][:10] }}</td>
+                    <td style="padding: 12px; font-weight: 600;">
+                        {{ (m['target_prob'] * 100) | round(1) if m['target_prob'] else 0 }}%
+                    </td>
+                    <td style="padding: 12px;">
+                        {% if m['target_prob'] and m['target_prob'] > 0.5 %}
+                            <span style="color: var(--alert);">● High Risk</span>
+                        {% else %}
+                            <span style="color: var(--safe);">● Normal</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+<!-- 4. KEY METRICS GRID -->
+<!-- 4. KEY METRICS GRID -->
+<!-- 4. KEY METRICS GRID -->
+<div class="metrics-grid">
+    <article class="card">
+        <span class="label">Step Regularity</span>
+        <div class="metric-value">{{ metrics[0]["regularidad_paso_pct"] if metrics else "--" }}</div>
+    </article>
+    <article class="card">
+        <span class="label">Micro Tremor</span>
+        <div class="metric-value">{{ metrics[0]["micro_temblor"] if metrics else "--" }}</div>
+    </article>
+    <article class="card">
+        <span class="label">Energy Efficiency</span>
+        <div class="metric-value">{{ metrics[0]["eficiencia_energetica_pct"] if metrics else "--" }}</div>
+    </article>
+    <article class="card">
+        <span class="label">Evolutionary Status</span>
+        <div class="metric-value">{{ metrics[0]["estado_evolutivo"] if metrics else "--" }}</div>
+    </article>
+</div>
 
     <!-- 5. PRIMARY ACTION BUTTON -->
     <div class="main-cta-container">
