@@ -36,6 +36,21 @@
                         <input type="file" name="file" id="fileInput" hidden>
                     </div>
 
+                    <!-- Notes input -->
+                    <div class="card" style="margin-top: 20px;">
+                        <div class="card-header">
+                            <span class="label">CLINICAL NOTES</span>
+                        </div>
+                    <div 
+                        id="notes-editor"
+                        class="notes-editor"
+                        contenteditable="true"
+                        data-placeholder="Add optional observations (e.g. patient fatigue, imbalance, pain...)"
+                    ></div>
+                        <!-- hidden input REAL que se envía -->
+                        <input type="hidden" name="notas" id="notas-hidden">
+                    </div>
+
                     <div class="form-actions">
                         <button type="submit" class="btn-primary w-100">
                             <span class="icon">╂</span> Analyze Walking Pattern

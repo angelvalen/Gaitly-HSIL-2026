@@ -405,3 +405,30 @@ body {
     .test-layout-grid { grid-template-columns: 1fr; }
     .decorative-graphic { display: none; }
 }
+
+.notes-input {
+    width: 100%;
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    padding: 12px 14px;
+    color: #e8f0ff;
+    font-size: 14px;
+    resize: none;
+    outline: none;
+    margin-top: 10px;
+    transition: all 0.2s ease;
+}
+
+.notes-input::placeholder {
+    color: #5f738c;
+}
+
+.notes-input:focus {
+    border-color: var(--accent-blue);
+    box-shadow: 0 0 0 1px rgba(74, 144, 226, 0.2);
+}
+
+.notes-editor:focus {
+    outline: none;
+}

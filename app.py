@@ -1,12 +1,12 @@
 import sqlite3
 from flask import Flask, render_template, request, redirect, session, flash
 from werkzeug.security import generate_password_hash, check_password_hash
+from datetime import datetime
 
 app = Flask(__name__)
 app.secret_key = "cambia_esto_por_una_clave_secreta"
 
-DB_PATH = "users.db"
-
+DB_PATH = "app.db"
 
 def get_db_connection():
     conn = sqlite3.connect(DB_PATH)
@@ -120,15 +120,15 @@ def statistics():
         (session["user_id"],)
     ).fetchone()
 
-    # Example: replace with your real stats queries
+    """ Example: replace with your real stats queries
     stats = conn.execute(
         "SELECT * FROM user_statistics WHERE user_id = ?",
         (session["user_id"],)
     ).fetchall()
-
+"""
     conn.close()
 
-    return render_template("statistics.html", user=user, stats=stats)
+    return render_template("statistics.html", user=user)
 
 
 @app.route("/test", methods=["GET", "POST"])
@@ -142,6 +142,24 @@ def test():
         if not file or file.filename == "":
             flash("No se ha seleccionado ningún archivo.")
             return redirect("/test")
+        
+        # Obtener resultados
+        resultado = 72.5  # ejemplo (lo que calcule tu modelo)
+        notas = "Patrón de marcha con ligera asimetría"  # ejemplo
+        fecha = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        user_id = session["user_id"]
+
+        # Insertar en DB
+        conn = get_db_connection()
+        conn.execute(
+            """
+            INSERT INTO tests (user_id, fecha, resultado, notas)
+            VALUES (?, ?, ?, ?)
+            """,
+            (user_id, fecha, resultado, notas)
+        )
+        conn.commit()
+        conn.close()
 
         # Lógica de procesamiento aquí... --------------------------------------------
         flash("Análisis completado con éxito.")
