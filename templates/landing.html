@@ -136,23 +136,84 @@
                 </script>
 
                 <style>
-                    .landing-container { padding-top: 4rem; padding-bottom: 4rem; }
-                    .landing-grid { display: grid; grid-template-columns: 1fr; gap: 60px; align-items: start; justify-items: center; max-width: 900px; margin: 0 auto; }
-                    
-                    .hero-section { width: 100%; text-align: center; }
-                    .hero-section h1 { font-size: 3.5rem; font-weight: 800; margin: 1rem 0; letter-spacing: -1px; }
-                    .subtitle { font-size: 1.4rem; color: var(--text-primary); margin-bottom: 1.5rem; line-height: 1.3; }
-                    .hero-details { color: var(--text-muted); font-size: 1rem; border-left: 2px solid var(--accent-blue); padding-left: 1.5rem; display: inline-block; text-align: left; }
-                    
-                    .visual-data-box { margin-top: 3rem; opacity: 0.7; width: 100%; }
-                    .landing-chart-wrapper { height: 120px; width: 100%; }
+            .landing-container { 
+                padding-top: 4rem; 
+                padding-bottom: 4rem; 
+                width: 100%;
+                display: flex;
+                justify-content: center;
+            }
 
-                    .auth-section { width: 100%; max-width: 450px; }
+            .landing-grid { 
+                display: grid; 
+                grid-template-columns: 1fr; 
+                gap: 60px; 
+                align-items: start; 
+                justify-items: center; 
+                max-width: 900px; 
+                margin: 0 auto; 
+                width: 100%;
+            }
+            
+            .hero-section { 
+                width: 100%; 
+                text-align: center; 
+                display: flex; /* Añadido para control total */
+                flex-direction: column;
+                align-items: center; 
+            }
 
-                    @media (max-width: 992px) {
-                        .hero-section h1 { font-size: 2.5rem; }
-                    }
-                </style>
+            .hero-section h1 { 
+                font-size: 3.5rem; 
+                font-weight: 800; 
+                margin: 1rem 0; 
+                letter-spacing: -1px; 
+            }
+
+            .subtitle { 
+                font-size: 1.4rem; 
+                color: var(--text-primary); 
+                margin-bottom: 1.5rem; 
+                line-height: 1.3; 
+                max-width: 700px; /* Evita que el texto sea demasiado ancho */
+            }
+
+            .hero-details { 
+                color: var(--text-muted); 
+                font-size: 1rem; 
+                border-left: 2px solid var(--accent-blue); 
+                padding: 0.5rem 0 0.5rem 1.5rem; /* Añadido padding para que el borde luzca bien */
+                display: inline-block; 
+                text-align: left; /* El texto por dentro a la izquierda, pero el bloque centrado */
+                margin: 0 auto;
+            }
+            
+            .visual-data-box { 
+                margin-top: 3rem; 
+                opacity: 0.7; 
+                width: 100%; 
+                max-width: 600px; /* Ancho controlado para que no se vea "gigante" en PC */
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .landing-chart-wrapper { 
+                height: 100px; /* Reducido un poco para mayor elegancia */
+                width: 100%; 
+            }
+
+            .auth-section { 
+                width: 100%; 
+                max-width: 450px; 
+                margin: 0 auto; /* Centrado del bloque de login */
+            }
+
+            @media (max-width: 992px) {
+                .hero-section h1 { font-size: 2.5rem; }
+                .landing-container { padding-left: 1.5rem; padding-right: 1.5rem; }
+            }
+        </style>
             </div>
     </main>
 </body>

@@ -19,9 +19,22 @@ def main():
     CREATE TABLE IF NOT EXISTS tests (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         user_id INTEGER NOT NULL,
-        fecha TEXT NOT NULL,
-        resultado REAL,
-        notas TEXT,
+        date TEXT NOT NULL,
+        wv_tremor_energy REAL,
+        wv_gait_energy REAL,
+        acc_jerk_rms REAL,
+        spectral_entropy REAL,
+        target_prob REAL,
+        riesgo_caida_pct REAL,
+        tendencia_pendiente REAL,
+        estado_evolutivo TEXT,
+        ritmo_caos REAL,
+        control_motor REAL,
+        micro_temblor REAL,
+        regularidad_paso_pct REAL,
+        suavidad_mecanica_pct REAL,
+        eficiencia_energetica_pct REAL,
+        fatiga_dinamica_ptc REAL,
         FOREIGN KEY (user_id) REFERENCES users(id)
     )
     """)

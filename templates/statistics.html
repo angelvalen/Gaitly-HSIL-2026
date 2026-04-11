@@ -27,63 +27,56 @@
         
         <section class="card">
             <div class="card-header">
-                <span class="label" style="color: var(--accent-blue);">Temporal Dynamics</span>
+                <span class="label" style="color: var(--accent-blue);">Gait Quality & Efficiency</span>
             </div>
             <div class="detailed-metrics-list">
                 <div class="detail-item">
-                    <span>Double Support Time</span>
-                    <span class="val">240 <small>ms</small></span>
+                    <span>Mechanical Smoothness</span> <span class="val">{{ metrics[0]['suavidad_mecanica_pct'] | round(1) }} <small>%</small></span>
                 </div>
                 <hr style="border: 0; border-top: 1px solid var(--border-subtle); margin: 10px 0;">
                 <div class="detail-item">
-                    <span>Stance Phase %</span>
-                    <span class="val">62.4 <small>%</small></span>
+                    <span>Energy Efficiency</span> <span class="val">{{ metrics[0]['eficiencia_energetica_pct'] | round(1) }} <small>%</small></span>
                 </div>
                 <div class="detail-item">
-                    <span>Swing Phase %</span>
-                    <span class="val">37.6 <small>%</small></span>
+                    <span>Dynamic Fatigue</span> <span class="val" style="color: {% if metrics[0]['fatiga_dinamica_pct'] > 20 %}var(--warning){% else %}inherit{% endif %};">
+                        {{ metrics[0]['fatiga_dinamica_pct'] | round(1) }} <small>%</small>
+                    </span>
                 </div>
             </div>
         </section>
 
         <section class="card">
             <div class="card-header">
-                <span class="label" style="color: var(--warning);">Symmetry & Balance</span>
+                <span class="label" style="color: var(--warning);">Stability & Coordination</span>
             </div>
             <div class="detailed-metrics-list">
                 <div class="detail-item">
-                    <span>Step Length Asymmetry</span>
-                    <span class="val" style="color: var(--warning);">8.4 <small>%</small></span>
+                    <span>Motor Control Index</span> <span class="val">{{ metrics[0]['control_motor'] | round(1) }} <small>%</small></span>
                 </div>
                 <hr style="border: 0; border-top: 1px solid var(--border-subtle); margin: 10px 0;">
                 <div class="detail-item">
-                    <span>Center of Mass Sway</span>
-                    <span class="val">12 <small>mm</small></span>
+                    <span>Step Regularity</span> <span class="val">{{ metrics[0]['regularidad_paso_pct'] | round(1) }} <small>%</small></span>
                 </div>
                 <div class="detail-item">
-                    <span>Lateral Deviations</span>
-                    <span class="val">2.1 <small>/min</small></span>
+                    <span>Gait Complexity (Chaos)</span> <span class="val">{{ metrics[0]['ritmo_caos'] | round(2) }}</span>
                 </div>
             </div>
         </section>
 
         <section class="card">
             <div class="card-header">
-                <span class="label" style="color: var(--alert);">Neuropathic Markers</span>
+                <span class="label" style="color: var(--alert);">Neurological Signs</span>
             </div>
             <div class="detailed-metrics-list">
                 <div class="detail-item">
-                    <span>Gait Variability Index</span>
-                    <span class="val">112.5</span>
+                    <span>Micro-Tremor Level</span> <span class="val">{{ metrics[0]['micro_temblor'] | round(3) }}</span>
                 </div>
                 <hr style="border: 0; border-top: 1px solid var(--border-subtle); margin: 10px 0;">
                 <div class="detail-item">
-                    <span>Proprioception Score</span>
-                    <span class="val">Low</span>
+                    <span>Gait Signal Entropy</span> <span class="val">{{ metrics[0]['spectral_entropy'] | round(2) }}</span>
                 </div>
                 <div class="detail-item">
-                    <span>Toxicity Correlation</span>
-                    <span class="val">High</span>
+                    <span>Evolutionary Status</span> <span class="val" style="font-size: 0.9rem; font-weight: 600;">{{ metrics[0]['estado_evolutivo'] }}</span>
                 </div>
             </div>
         </section>
@@ -110,21 +103,25 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
     const nodeCtx = document.getElementById('nodeChart').getContext('2d');
-    
-    // Datos de ejemplo para los tests previos
+
+    // Mapeamos los datos reales de la base de datos
+    // x: posición horizontal fija basada en el orden
+    // y: altura basada en el porcentaje de riesgo
     const testData = [
-        { x: 10, y: 20, label: 'Test 01/Oct', score: 28, symmetry: '94%' },
-        { x: 25, y: 35, label: 'Test 04/Oct', score: 35, symmetry: '92%' },
-        { x: 45, y: 30, label: 'Test 08/Oct', score: 42, symmetry: '89%' },
-        { x: 70, y: 55, label: 'Test 12/Oct', score: 68, symmetry: '85%' },
-        { x: 90, y: 75, label: 'Test 15/Oct', score: 72, symmetry: '82%' }
+        {% for m in metrics %}
+        { 
+            x: {{ loop.revindex0 * 20 + 10 }}, // Distribuye de 10 en 10
+            y: {{ (m['target_prob'] * 100) | round }}, 
+            label: "{{ m['date'][:10] }}",
+            score: {{ (m['target_prob'] * 100) | round }}
+        },
+        {% endfor %}
     ];
 
     new Chart(nodeCtx, {
         type: 'scatter',
         data: {
             datasets: [{
-                label: 'Patient Tests',
                 data: testData,
                 backgroundColor: '#4a90e2',
                 borderColor: '#f8f9fa',
@@ -140,19 +137,21 @@
             responsive: true,
             maintainAspectRatio: false,
             scales: {
-                y: { display: false, min: 0, max: 100 },
+                // Mantenemos los ejes ocultos para el efecto "Grafo"
+                y: { display: false, min: -10, max: 110 },
                 x: { display: false, min: 0, max: 100 }
             },
             plugins: {
                 legend: { display: false },
                 tooltip: {
+                    backgroundColor: '#141b2d',
+                    titleColor: '#8e9db0',
                     callbacks: {
                         label: function(context) {
-                            const d = testData[context.dataIndex];
+                            const d = context.raw;
                             return [
-                                d.label,
-                                `Overall Risk: ${d.score}%`,
-                                `Symmetry: ${d.symmetry}`
+                                `Fecha: ${d.label}`,
+                                `Riesgo: ${d.score}%`
                             ];
                         }
                     }

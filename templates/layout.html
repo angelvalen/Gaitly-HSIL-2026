@@ -3,21 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}HSIL AI{% endblock %}</title>
+    <title>{% block title %}GAITLY{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
     <nav class="navbar">
         <div class="nav-container">
             <a href="/" class="nav-logo">
-                <span class="pulse"></span> HSIL AI
+                <span class="pulse"></span> GAITLY
             </a>
             {% if session.get('user_id') %}
             <div class="nav-links">
-                <a href="/">Inicio</a>
+                <a href="/">Home</a>
                 <a href="/test">Test</a>
-                <a href="/statistics">Estadísticas</a>
-                <a href="/logout" class="logout-link">Cerrar Sesión</a>
+                <a href="/statistics">Statistics</a>
+                <a href="/logout" class="logout-link">Log Out</a>
             </div>
             {% endif %}
         </div>
@@ -40,12 +40,8 @@
 
     <footer class="footer">
         <div class="container">
-            <p class="footer-phrase">"La tecnología es mejor cuando une a las personas."</p>
-            <div class="footer-links">
-                <a href="#">Privacidad</a>
-                <a href="#">Términos de uso</a>
-                <a href="#">Contacto</a>
-            </div>
+            <p class="footer-phrase">"Technology is best at uniting people. HSIL Hackathon 2026. Madrid"</p>
+            <p class="footer-phrase"><a href="https://www.linkedin.com/in/angelvalenciapadilla/">Ángel Valencia</a> | <a href="https://www.linkedin.com/in/no%C3%A9-fuentes-p%C3%A9rez-b2410534a/">Noé Fuentes</a> | <a href="https://www.linkedin.com/in/cristianmassardo/">Cristian Massardo</a> | <a href="https://www.linkedin.com/in/manuel-mu%C3%B1oz-serna-039829179/">Manuel Muñoz</a> | <a href="https://www.linkedin.com/in/avin-piroutiniya-75a96493/">Avin Piroutiniya</a></p>
         </div>
     </footer>
 </body>

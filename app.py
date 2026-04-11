@@ -75,11 +75,11 @@ def register():
         confirmation = request.form.get("confirmation", "")
 
         if not username or not email or not password or not confirmation:
-            flash("Todos los campos son obligatorios.")
+            flash("All fields are required.")
             return render_template("landing.html")
 
         if password != confirmation:
-            flash("Las contraseñas no coinciden.")
+            flash("Passwords do not match.")
             return render_template("landing.html")
 
         password_hash = generate_password_hash(password)
@@ -92,7 +92,7 @@ def register():
 
         if existing_user:
             conn.close()
-            flash("Ese usuario o email ya existe.")
+            flash("E-mail or user already exists.")
             return render_template("landing.html")
 
         conn.execute(
@@ -102,7 +102,7 @@ def register():
         conn.commit()
         conn.close()
 
-        flash("Registro completado. Ya puedes iniciar sesión.")
+        flash("Registration completed. You can now log-in.")
         return redirect("/landing")
 
     return render_template("landing.html")
@@ -115,7 +115,7 @@ def login():
         password = request.form.get("password", "")
 
         if not username or not password:
-            flash("Debes completar usuario y contraseña.")
+            flash("You must enter both username and password")
             return render_template("landing.html")
 
         conn = get_db_connection()
@@ -126,11 +126,11 @@ def login():
         conn.close()
 
         if user is None or not check_password_hash(user["password_hash"], password):
-            flash("Usuario o contraseña incorrectos.")
+            flash("Wrong username or password.")
             return render_template("landing.html")
 
         session["user_id"] = user["id"]
-        flash("Sesión iniciada correctamente.")
+        flash("Log-in succesful.")
         return redirect("/")
 
     return render_template("landing.html")
@@ -139,7 +139,7 @@ def login():
 @app.route("/logout")
 def logout():
     session.clear()
-    flash("Has cerrado sesión.")
+    flash("You have logged-out.")
     return redirect("/")
 
 
@@ -155,15 +155,14 @@ def statistics():
         (session["user_id"],)
     ).fetchone()
 
-    """ Example: replace with your real stats queries
-    stats = conn.execute(
-        "SELECT * FROM user_statistics WHERE user_id = ?",
+    
+    metrics = conn.execute(
+        "SELECT * FROM tests WHERE user_id = ?",
         (session["user_id"],)
     ).fetchall()
-"""
     conn.close()
 
-    return render_template("statistics.html", user=user)
+    return render_template("statistics.html", user=user, metrics=metrics)
 
 
 @app.route("/test", methods=["GET", "POST"])
@@ -269,7 +268,7 @@ def api_live_preview():
 @app.post("/api/live-finish")
 def api_live_finish():
     if "user_id" not in session:
-        return jsonify({"ok": False, "error": "Usuario no autenticado"}), 401
+        return jsonify({"ok": False, "error": "User not autenticated"}), 401
 
     try:
         result = finalize_live_test()
