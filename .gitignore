@@ -1,3 +1,9 @@
 /dataset
 .venv
+<<<<<<< HEAD
 __pycache__
+=======
+/flask_session
+users.db
+/__pycache__
+>>>>>>> 985761b97e3b6cd7361729cec6aa48f6efb2be5a

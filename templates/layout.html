@@ -3,86 +3,50 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}NeuroDetect{% endblock %}</title>
-    <meta name="description" content="Aplicación para análisis clínico y detección asistida de neuropatía a partir de documentos médicos.">
-
+    <title>{% block title %}HSIL AI{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-
-    <header class="site-header">
-        <div class="container header-inner">
-            <a href="/" class="brand">
-                <div class="brand-mark">N</div>
-                <div class="brand-text">
-                    <span class="brand-title">NeuroDetect</span>
-                    <span class="brand-subtitle">Clinical Screening Platform</span>
-                </div>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="/" class="nav-logo">
+                <span class="pulse"></span> HSIL AI
             </a>
-
-            <nav class="main-nav">
+            {% if session.get('user_id') %}
+            <div class="nav-links">
                 <a href="/">Inicio</a>
-                <a href="/about">Plataforma</a>
-                <a href="/upload">Análisis</a>
-                <a href="/contact">Contacto</a>
-
-                {% if session.get("user_id") %}
-                    <a href="/profile" class="nav-button nav-button-light">Perfil</a>
-                    <a href="/logout" class="nav-button">Cerrar sesión</a>
-                {% else %}
-                    <a href="/login" class="nav-button nav-button-light">Acceder</a>
-                    <a href="/register" class="nav-button">Registrarse</a>
-                {% endif %}
-            </nav>
-        </div>
-    </header>
-
-    <section class="hero-bar">
-        <div class="container hero-bar-inner">
-            <div>
-                <p class="eyebrow">Evaluación asistida por IA</p>
-                <h1 class="hero-title">{% block page_heading %}Detección de neuropatía{% endblock %}</h1>
-                <p class="hero-subtitle">
-                    Plataforma orientada a apoyar el cribado y análisis preliminar de documentación clínica.
-                </p>
+                <a href="/test">Test</a>
+                <a href="/statistics">Estadísticas</a>
+                <a href="/logout" class="logout-link">Cerrar Sesión</a>
             </div>
+            {% endif %}
         </div>
-    </section>
+    </nav>
 
-    <main class="site-main">
+    <main class="main-content">
+        {% with messages = get_flashed_messages() %}
+          {% if messages %}
+            <div class="container flash-container">
+              {% for message in messages %}
+                <div class="flash-message">{{ message }}</div>
+              {% endfor %}
+            </div>
+          {% endif %}
+        {% endwith %}
         <div class="container">
-            {% with messages = get_flashed_messages() %}
-                {% if messages %}
-                    <section class="flash-wrapper">
-                        {% for message in messages %}
-                            <div class="flash-message">
-                                {{ message }}
-                            </div>
-                        {% endfor %}
-                    </section>
-                {% endif %}
-            {% endwith %}
-
             {% block main %}{% endblock %}
         </div>
     </main>
 
-    <footer class="site-footer">
-        <div class="container footer-inner">
-            <div>
-                <p class="footer-brand">NeuroDetect</p>
-                <p class="footer-text">
-                    Herramienta de apoyo a la evaluación clínica. No sustituye el juicio médico profesional.
-                </p>
-            </div>
-
+    <footer class="footer">
+        <div class="container">
+            <p class="footer-phrase">"La tecnología es mejor cuando une a las personas."</p>
             <div class="footer-links">
-                <a href="/about">Información</a>
-                <a href="/privacy">Privacidad</a>
-                <a href="/contact">Soporte</a>
+                <a href="#">Privacidad</a>
+                <a href="#">Términos de uso</a>
+                <a href="#">Contacto</a>
             </div>
         </div>
     </footer>
-
 </body>
 </html>

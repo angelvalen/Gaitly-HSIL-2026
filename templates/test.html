@@ -1,0 +1,112 @@
+{% extends "layout.html" %}
+
+{% block title %}Nuevo Test | CIPN Gait Analyzer{% endblock %}
+
+{% block main %}
+<div class="test-container fade-in">
+    
+    <header class="dashboard-header">
+        <div class="header-info">
+            <h1>New Walking Assessment</h1>
+            <span class="status-badge"><span class="pulse"></span> System Ready for Data</span>
+        </div>
+        <div class="header-meta">
+            <span class="ai-tag">Motion Analysis Module</span>
+        </div>
+    </header>
+
+    <div class="test-layout-grid">
+        <section class="test-form-section">
+            <div class="card upload-card">
+                <div class="card-header">
+                    <span class="label">Step 1: Upload Data</span>
+                </div>
+                
+                <form action="/test" method="post" enctype="multipart/form-data" class="upload-form">
+                    <div class="drop-zone" id="drop-zone">
+                        <div class="upload-icon">
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--accent-blue)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="17 8 12 3 7 8"></polyline>
+                                <line x1="12" y1="3" x2="12" y2="15"></line>
+                            </svg>
+                        </div>
+                        <p class="insight-text">Drag and drop your gait sensor data or click to browse</p>
+                        <span class="timestamp">Supported formats: .CSV, .JSON, .TXT</span>
+                        <input type="file" name="file" id="fileInput" hidden>
+                    </div>
+
+                    <!-- Notes input -->
+                    <div class="card" style="margin-top: 20px;">
+                        <div class="card-header">
+                            <span class="label">CLINICAL NOTES</span>
+                        </div>
+                    <div 
+                        id="notes-editor"
+                        class="notes-editor"
+                        contenteditable="true"
+                        data-placeholder="Add optional observations (e.g. patient fatigue, imbalance, pain...)"
+                    ></div>
+                        <!-- hidden input REAL que se envía -->
+                        <input type="hidden" name="notas" id="notas-hidden">
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn-primary w-100">
+                            <span class="icon">╂</span> Analyze Walking Pattern
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <aside class="test-instructions-section">
+            <div class="decorative-graphic">
+                <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                    <path fill="var(--accent-blue)" fill-opacity="0.03" d="M44.7,-76.4C58.1,-69.2,69.2,-57.4,76.4,-43.9C83.6,-30.4,86.9,-15.2,85.1,-0.9C83.4,13.3,76.6,26.7,68.2,38.2C59.8,49.7,49.8,59.3,38,67.6C26.2,75.9,13.1,82.9,-0.8,84.4C-14.7,85.8,-29.4,81.7,-42.6,74.1C-55.8,66.5,-67.5,55.4,-75.4,42.2C-83.3,29,-87.3,13.7,-85.7,-1C-84.1,-15.7,-76.9,-29.8,-67.7,-41.8C-58.5,-53.8,-47.3,-63.7,-34.7,-71.4C-22.1,-79.1,-11.1,-84.6,2.5,-88.9C16.1,-93.2,31.3,-83.6,44.7,-76.4Z" transform="translate(100 100)" />
+                </svg>
+            </div>
+
+            <div class="card instructions-card">
+                <div class="card-header">
+                    <span class="label">Testing Protocol</span>
+                </div>
+                <h3>Preparation Guide</h3>
+                <ul class="instruction-list">
+                    <li>
+                        <span class="list-num">01</span>
+                        <p>Ensure the wearable sensors are securely fastened to the <strong>mid-foot</strong> area.</p>
+                    </li>
+                    <li>
+                        <span class="list-num">02</span>
+                        <p>Walk on a flat surface at your <strong>natural pace</strong> for at least 30 seconds.</p>
+                    </li>
+                    <li>
+                        <span class="list-num">03</span>
+                        <p>Keep the smartphone within 3 meters to maintain a stable <strong>Bluetooth connection</strong>.</p>
+                    </li>
+                    <li>
+                        <span class="list-num">04</span>
+                        <p>Avoid talking or sudden head movements during the data collection phase.</p>
+                    </li>
+                </ul>
+            </div>
+        </aside>
+    </div>
+</div>
+
+<script>
+    // Simple script to handle file selection visual
+    const dropZone = document.getElementById('drop-zone');
+    const fileInput = document.getElementById('fileInput');
+
+    dropZone.onclick = () => fileInput.click();
+
+    fileInput.onchange = () => {
+        if(fileInput.files.length > 0) {
+            dropZone.querySelector('.insight-text').innerText = "File ready: " + fileInput.files[0].name;
+            dropZone.style.borderColor = "var(--safe)";
+        }
+    };
+</script>
+{% endblock %}

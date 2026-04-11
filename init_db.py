@@ -1,18 +1,37 @@
 import sqlite3
 
-conn = sqlite3.connect("users.db")
-cursor = conn.cursor()
+def main():
+    conn = sqlite3.connect("app.db")
+    cursor = conn.cursor()
 
-cursor.execute("""
-CREATE TABLE IF NOT EXISTS users (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    username TEXT NOT NULL UNIQUE,
-    email TEXT NOT NULL UNIQUE,
-    password_hash TEXT NOT NULL
-)
-""")
+    # USERS
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS users (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        username TEXT NOT NULL UNIQUE,
+        email TEXT NOT NULL UNIQUE,
+        password_hash TEXT NOT NULL
+    )
+    """)
 
-conn.commit()
-conn.close()
+    # TESTS
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS tests (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER NOT NULL,
+        fecha TEXT NOT NULL,
+        resultado REAL,
+        notas TEXT,
+        FOREIGN KEY (user_id) REFERENCES users(id)
+    )
+    """)
 
-print("Base de datos creada correctamente.")
+    conn.commit()
+    conn.close()
+
+    return 0
+
+if __name__ == "__main__":
+    print("Initializing database")
+    main()
+    
