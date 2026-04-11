@@ -1,0 +1,164 @@
+{% extends "layout.html" %}
+
+{% block title %}Detailed Statistics | CIPN Gait Analyzer{% endblock %}
+
+{% block main %}
+<div class="dashboard-wrapper fade-in">
+    <header class="dashboard-header">
+        <div class="header-info">
+            <h1>Clinical Statistics</h1>
+            <span class="status-badge"><span class="pulse"></span> Deep Analysis Mode</span>
+        </div>
+        <div class="header-meta">
+            <a href="/" class="btn-secondary" style="padding: 0.5rem 1rem; font-size: 0.75rem;">← Back to Dashboard</a>
+        </div>
+    </header>
+
+    <section class="card node-chart-panel" style="margin-bottom: 2rem;">
+        <div class="card-header">
+            <span class="label">Historical Test Nodes (Hover for details)</span>
+        </div>
+        <div class="chart-wrapper" style="height: 300px;">
+            <canvas id="nodeChart"></canvas>
+        </div>
+    </section>
+
+    <div class="metrics-detailed-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-bottom: 2rem;">
+        
+        <section class="card">
+            <div class="card-header">
+                <span class="label" style="color: var(--accent-blue);">Temporal Dynamics</span>
+            </div>
+            <div class="detailed-metrics-list">
+                <div class="detail-item">
+                    <span>Double Support Time</span>
+                    <span class="val">240 <small>ms</small></span>
+                </div>
+                <hr style="border: 0; border-top: 1px solid var(--border-subtle); margin: 10px 0;">
+                <div class="detail-item">
+                    <span>Stance Phase %</span>
+                    <span class="val">62.4 <small>%</small></span>
+                </div>
+                <div class="detail-item">
+                    <span>Swing Phase %</span>
+                    <span class="val">37.6 <small>%</small></span>
+                </div>
+            </div>
+        </section>
+
+        <section class="card">
+            <div class="card-header">
+                <span class="label" style="color: var(--warning);">Symmetry & Balance</span>
+            </div>
+            <div class="detailed-metrics-list">
+                <div class="detail-item">
+                    <span>Step Length Asymmetry</span>
+                    <span class="val" style="color: var(--warning);">8.4 <small>%</small></span>
+                </div>
+                <hr style="border: 0; border-top: 1px solid var(--border-subtle); margin: 10px 0;">
+                <div class="detail-item">
+                    <span>Center of Mass Sway</span>
+                    <span class="val">12 <small>mm</small></span>
+                </div>
+                <div class="detail-item">
+                    <span>Lateral Deviations</span>
+                    <span class="val">2.1 <small>/min</small></span>
+                </div>
+            </div>
+        </section>
+
+        <section class="card">
+            <div class="card-header">
+                <span class="label" style="color: var(--alert);">Neuropathic Markers</span>
+            </div>
+            <div class="detailed-metrics-list">
+                <div class="detail-item">
+                    <span>Gait Variability Index</span>
+                    <span class="val">112.5</span>
+                </div>
+                <hr style="border: 0; border-top: 1px solid var(--border-subtle); margin: 10px 0;">
+                <div class="detail-item">
+                    <span>Proprioception Score</span>
+                    <span class="val">Low</span>
+                </div>
+                <div class="detail-item">
+                    <span>Toxicity Correlation</span>
+                    <span class="val">High</span>
+                </div>
+            </div>
+        </section>
+    </div>
+</div>
+
+<style>
+    .detail-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 0;
+    }
+    .detail-item span:first-child {
+        color: var(--text-muted);
+        font-size: 0.9rem;
+    }
+    .detail-item .val {
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const nodeCtx = document.getElementById('nodeChart').getContext('2d');
+    
+    // Datos de ejemplo para los tests previos
+    const testData = [
+        { x: 10, y: 20, label: 'Test 01/Oct', score: 28, symmetry: '94%' },
+        { x: 25, y: 35, label: 'Test 04/Oct', score: 35, symmetry: '92%' },
+        { x: 45, y: 30, label: 'Test 08/Oct', score: 42, symmetry: '89%' },
+        { x: 70, y: 55, label: 'Test 12/Oct', score: 68, symmetry: '85%' },
+        { x: 90, y: 75, label: 'Test 15/Oct', score: 72, symmetry: '82%' }
+    ];
+
+    new Chart(nodeCtx, {
+        type: 'scatter',
+        data: {
+            datasets: [{
+                label: 'Patient Tests',
+                data: testData,
+                backgroundColor: '#4a90e2',
+                borderColor: '#f8f9fa',
+                borderWidth: 2,
+                pointRadius: 10,
+                pointHoverRadius: 15,
+                showLine: true,
+                borderColor: 'rgba(74, 144, 226, 0.3)',
+                tension: 0.3
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: { display: false, min: 0, max: 100 },
+                x: { display: false, min: 0, max: 100 }
+            },
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const d = testData[context.dataIndex];
+                            return [
+                                d.label,
+                                `Overall Risk: ${d.score}%`,
+                                `Symmetry: ${d.symmetry}`
+                            ];
+                        }
+                    }
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}

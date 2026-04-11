@@ -1,84 +1,147 @@
 {% extends "layout.html" %}
 
-{% block title %}Inicio | NeuroDetect{% endblock %}
-{% block page_heading %}Panel de análisis clínico{% endblock %}
+{% block title %}Dashboard | CIPN Gait Analyzer{% endblock %}
 
 {% block main %}
-
-<section class="grid-two">
-    <article class="card card-highlight">
-        <h2>Cargar informe PDF</h2>
-        <p class="section-text">
-            Sube un documento clínico en PDF para ejecutar el análisis preliminar mediante el modelo.
-        </p>
-
-        <form action="/" method="POST" enctype="multipart/form-data" class="upload-form">
-            <label for="pdf" class="form-label">Selecciona un archivo</label>
-            <input id="pdf" type="file" name="pdf" accept="application/pdf" required>
-
-            <button type="submit" class="primary-button">Procesar documento</button>
-        </form>
-    </article>
-
-    <article class="card">
-        <h2>Resumen del flujo</h2>
-        <ul class="feature-list">
-            <li>Carga segura del documento</li>
-            <li>Procesamiento automático en backend</li>
-            <li>Extracción y análisis del contenido</li>
-            <li>Presentación estructurada del resultado</li>
-        </ul>
-    </article>
-</section>
-
-{% if resultado %}
-<section class="card result-card">
-    <h2>Resultado del análisis</h2>
-    <div class="result-grid">
-        <div class="result-item">
-            <span class="result-label">Archivo</span>
-            <span class="result-value">{{ resultado.nombre_archivo }}</span>
+<div class="dashboard-wrapper fade-in">
+    
+    <header class="dashboard-header">
+        <div class="header-info">
+            <h1>Gait Monitoring Dashboard</h1>
+            <span class="status-badge"><span class="pulse"></span> Gait Monitoring Active</span>
         </div>
-        <div class="result-item">
-            <span class="result-label">Estado</span>
-            <span class="result-value">{{ resultado.mensaje }}</span>
+        <div class="header-meta">
+            <span class="ai-tag">AI Analysis Engine v2.4</span>
+            <span class="timestamp">Last updated: 5 min ago</span>
         </div>
-        <div class="result-item">
-            <span class="result-label">Predicción</span>
-            <span class="result-value result-emphasis">{{ resultado.prediccion }}</span>
-        </div>
+    </header>
+
+    <!-- Main Risk Overview -->
+    <div class="risk-overview-grid">
+        <!-- 1. MAIN RISK SCORE -->
+        <section class="card risk-main-display">
+            <div class="card-header">
+                <span class="label">CIPN RISK SCORE</span>
+            </div>
+            {% set score = score|default(72) %}
+            <div class="gauge-container" style="--score: {{ score }};">
+                <svg viewBox="0 0 100 100" class="gauge-svg">
+                    <circle class="gauge-bg" cx="50" cy="50" r="42"></circle>
+                    <circle class="gauge-fill {% if score < 30 %}safe{% elif score <= 70 %}warning{% else %}alert{% endif %}" cx="50" cy="50" r="42"></circle>
+                </svg>
+                <div class="gauge-text">
+                    <span class="score-val">{{ score }}</span>
+                    <span class="score-label">
+                        {% if score < 30 %}LOW RISK{% elif score <= 70 %}MEDIUM{% else %}HIGH RISK{% endif %}
+                    </span>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. CLINICAL RECOMMENDATION BOX -->
+        <section class="card recommendation-panel">
+            <div class="card-header">
+                <span class="label">CLINICAL INSIGHT</span>
+            </div>
+            <div class="recommendation-content">
+                <p class="insight-text">
+                    {% if score < 30 %}
+                        Patient exhibits stable gait patterns. No immediate neurological intervention required.
+                    {% elif score <= 70 %}
+                        Detected subtle decline in step symmetry. Suggest initiation of supervised balance training.
+                    {% else %}
+                        Critical reduction in walking stability. Urgent neurological review recommended to assess chemotherapy toxicity.
+                    {% endif %}
+                </p>
+                <div class="action-tag">Clinical Review Recommended</div>
+            </div>
+        </section>
     </div>
-</section>
-{% endif %}
 
-{% if error %}
-<section class="card error-card">
-    <h2>Incidencia</h2>
-    <p>{{ error }}</p>
-</section>
-{% endif %}
+    <!-- 2. TREND OVER TIME -->
+    <section class="card trend-panel">
+        <div class="card-header">
+            <span class="label">RISK EVOLUTION</span>
+        </div>
+        <div class="chart-wrapper">
+            <canvas id="trendChart"></canvas>
+        </div>
+    </section>
 
-<section class="grid-three">
-    <article class="card">
-        <h3>Enfoque clínico</h3>
-        <p class="section-text">
-            Diseñado para integrarse en un flujo de revisión documental orientado a apoyo diagnóstico.
-        </p>
-    </article>
+    <!-- 4. KEY METRICS GRID -->
+    <div class="metrics-grid">
+        <article class="card">
+            <span class="label">CADENCE</span>
+            <div class="metric-value">104 <small>steps/min</small></div>
+            <div class="metric-status status-normal">Within range</div>
+        </article>
+        <article class="card">
+            <span class="label">SYMMETRY</span>
+            <div class="metric-value">82.1 <small>%</small></div>
+            <div class="metric-status status-warning">-4.2% vs last test</div>
+        </article>
+        <article class="card">
+            <span class="label">VARIABILITY</span>
+            <div class="metric-value">5.8 <small>%</small></div>
+            <div class="metric-status status-alert">Above threshold</div>
+        </article>
+        <article class="card">
+            <span class="label">STEP LENGTH</span>
+            <div class="metric-value">0.62 <small>m</small></div>
+            <div class="metric-status status-normal">Stable</div>
+        </article>
+    </div>
 
-    <article class="card">
-        <h3>Trazabilidad</h3>
-        <p class="section-text">
-            La plataforma puede ampliarse para registrar resultados, versiones del modelo y auditoría.
-        </p>
-    </article>
+    <!-- 5. PRIMARY ACTION BUTTON -->
+    <div class="main-cta-container">
+        <a href="/test" class="btn-primary">
+            <span class="icon">╂</span> Start New Walking Test
+        </a>
+        <a href="/statistics" class="btn-secondary">View Detailed Reports</a>
+    </div>
+</div>
 
-    <article class="card">
-        <h3>Escalabilidad</h3>
-        <p class="section-text">
-            La arquitectura permite incorporar nuevos modelos, validaciones y tipos de documento.
-        </p>
-    </article>
-</section>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const ctx = document.getElementById('trendChart').getContext('2d');
+    
+    // Gradiente para el área del gráfico
+    const gradient = ctx.createLinearGradient(0, 0, 0, 300);
+    gradient.addColorStop(0, 'rgba(74, 144, 226, 0.2)');
+    gradient.addColorStop(1, 'rgba(74, 144, 226, 0)');
 
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: ['01 Oct', '04 Oct', '08 Oct', '12 Oct', '15 Oct'],
+            datasets: [{
+                data: [28, 35, 42, 68, 72],
+                borderColor: '#4a90e2',
+                backgroundColor: gradient,
+                borderWidth: 2,
+                fill: true,
+                tension: 0.4,
+                pointRadius: 0,
+                pointHoverRadius: 5
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: {
+                    grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                    ticks: { color: '#5f738c', font: { size: 10 } },
+                    min: 0,
+                    max: 100,
+                },
+                x: { 
+                    grid: { display: false },
+                    ticks: { color: '#5f738c', font: { size: 10 } }
+                }
+            }
+        }
+    });
+</script>
 {% endblock %}
