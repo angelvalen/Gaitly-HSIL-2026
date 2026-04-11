@@ -1,2 +1,5 @@
 /dataset
 .venv
+/flask_session
+users.db
+/__pycache__

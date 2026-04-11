@@ -16,18 +16,20 @@ def get_db_connection():
 
 @app.route("/")
 def index():
-    user = None
-
-    if "user_id" in session:
-        conn = get_db_connection()
-        user = conn.execute(
-            "SELECT id, username, email FROM users WHERE id = ?",
-            (session["user_id"],)
-        ).fetchone()
-        conn.close()
+    if "user_id" not in session:
+        return redirect("/landing")
+    conn = get_db_connection()
+    user = conn.execute(
+        "SELECT id, username, email FROM users WHERE id = ?",
+        (session["user_id"],)
+    ).fetchone()
+    conn.close()
 
     return render_template("index.html", user=user)
 
+@app.route("/landing")
+def landing():
+    return render_template("landing.html")
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
@@ -39,11 +41,11 @@ def register():
 
         if not username or not email or not password or not confirmation:
             flash("Todos los campos son obligatorios.")
-            return render_template("register.html")
+            return render_template("landing.html")
 
         if password != confirmation:
             flash("Las contraseñas no coinciden.")
-            return render_template("register.html")
+            return render_template("landing.html")
 
         password_hash = generate_password_hash(password)
 
@@ -56,7 +58,7 @@ def register():
         if existing_user:
             conn.close()
             flash("Ese usuario o email ya existe.")
-            return render_template("register.html")
+            return render_template("landing.html")
 
         conn.execute(
             "INSERT INTO users (username, email, password_hash) VALUES (?, ?, ?)",
@@ -66,9 +68,9 @@ def register():
         conn.close()
 
         flash("Registro completado. Ya puedes iniciar sesión.")
-        return redirect("/login")
+        return redirect("/landing")
 
-    return render_template("register.html")
+    return render_template("landing.html")
 
 
 @app.route("/login", methods=["GET", "POST"])
@@ -79,7 +81,7 @@ def login():
 
         if not username or not password:
             flash("Debes completar usuario y contraseña.")
-            return render_template("login.html")
+            return render_template("landing.html")
 
         conn = get_db_connection()
         user = conn.execute(
@@ -90,13 +92,13 @@ def login():
 
         if user is None or not check_password_hash(user["password_hash"], password):
             flash("Usuario o contraseña incorrectos.")
-            return render_template("login.html")
+            return render_template("landing.html")
 
         session["user_id"] = user["id"]
         flash("Sesión iniciada correctamente.")
         return redirect("/")
 
-    return render_template("login.html")
+    return render_template("landing.html")
 
 
 @app.route("/logout")
@@ -104,6 +106,56 @@ def logout():
     session.clear()
     flash("Has cerrado sesión.")
     return redirect("/")
+
+
+@app.route("/statistics")
+def statistics():
+    if "user_id" not in session:
+        return redirect("/landing")
+
+    conn = get_db_connection()
+
+    user = conn.execute(
+        "SELECT id, username, email FROM users WHERE id = ?",
+        (session["user_id"],)
+    ).fetchone()
+
+    # Example: replace with your real stats queries
+    stats = conn.execute(
+        "SELECT * FROM user_statistics WHERE user_id = ?",
+        (session["user_id"],)
+    ).fetchall()
+
+    conn.close()
+
+    return render_template("statistics.html", user=user, stats=stats)
+
+
+@app.route("/test", methods=["GET", "POST"])
+def test():
+    if "user_id" not in session:
+        return redirect("/landing")
+
+    # Si el usuario hace clic en el botón de "Analyze" (POST)
+    if request.method == "POST":
+        file = request.files.get("file")
+        if not file or file.filename == "":
+            flash("No se ha seleccionado ningún archivo.")
+            return redirect("/test")
+
+        # Lógica de procesamiento aquí... --------------------------------------------
+        flash("Análisis completado con éxito.")
+        return redirect("/")
+
+    # Si el usuario solo entra a ver la página (GET)
+    conn = get_db_connection()
+    user = conn.execute(
+        "SELECT id, username, email FROM users WHERE id = ?",
+        (session["user_id"],)
+    ).fetchone()
+    conn.close()
+
+    return render_template("test.html", user=user)
 
 
 if __name__ == "__main__":
