@@ -6,3 +6,7 @@ joblib
 pandas
 scipy
 requests
+PyWavelets
+xgboost
+scikit-learn
+joblib
