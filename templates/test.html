@@ -119,7 +119,17 @@
                             <div class="pulse" style="height: 100%; width: 100%; background: var(--safe); border-radius: 0;"></div>
                         </div>
                     </div>
-
+                    <div class="input-group" style="margin-bottom: 1.25rem;">
+                        <label for="phyphox_url" class="label" style="margin-bottom: 0.5rem;">PHYPHOX DEVICE URL</label>
+                        <input
+                            type="text"
+                            id="phyphox_url"
+                            name="phyphox_url"
+                            placeholder="http://172.20.10.1"
+                            required
+                            autocomplete="off"
+                        >
+                    </div>
                     <div class="form-actions">
                         <button type="submit" class="btn-primary w-100" style="padding: 1.5rem; font-size: 1.1rem; letter-spacing: 0.02em;">
                             <span class="icon">⏵</span> Start Data Capture
@@ -162,7 +172,7 @@ const testForm = document.getElementById('testForm');
 const overlay = document.getElementById('loading-overlay');
 const timerDisplay = document.getElementById('timer-display');
 const progressBar = document.getElementById('progress-bar');
-
+const phyphoxUrlInput = document.getElementById('phyphox_url');
 const accCount = document.getElementById('acc-count');
 const gyroCount = document.getElementById('gyro-count');
 const fsEst = document.getElementById('fs-est');
@@ -251,12 +261,25 @@ function startCountdown(totalTime = 30) {
 }
 
 async function apiStart() {
+    const phyphoxUrl = phyphoxUrlInput.value.trim();
+
+    if (!phyphoxUrl) {
+        throw new Error('Debes introducir la URL de Phyphox');
+    }
+
     const res = await fetch('/api/live-start', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' }
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phyphox_url: phyphoxUrl })
     });
-    if (!res.ok) throw new Error('No se pudo iniciar la captura');
-    return await res.json();
+
+    const data = await res.json();
+
+    if (!res.ok || !data.ok) {
+        throw new Error(data.error || 'No se pudo iniciar la captura');
+    }
+
+    return data;
 }
 
 async function apiPreview() {

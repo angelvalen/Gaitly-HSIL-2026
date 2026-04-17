@@ -34,7 +34,7 @@ def main():
         regularidad_paso_pct REAL,
         suavidad_mecanica_pct REAL,
         eficiencia_energetica_pct REAL,
-        fatiga_dinamica_ptc REAL,
+        fatiga_dinamica_pct REAL,
         FOREIGN KEY (user_id) REFERENCES users(id)
     )
     """)

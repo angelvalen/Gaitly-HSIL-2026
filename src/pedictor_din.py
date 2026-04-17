@@ -13,7 +13,7 @@ from src.clinical_metrics import ClinicalMetricsEngine
 # =========================
 # CONFIGURACIÓN
 # =========================
-PHYPHOX_BASE_URL = "http://10.178.99.34"
+PHYPHOX_BASE_URL = "http://172.20.10.1"
 MODEL_PATH = Path("./model/cipn_final_model.pkl")
 POLL_EVERY = 0.5
 TARGET_SAMPLES = 1500
@@ -22,24 +22,24 @@ TARGET_SAMPLES = 1500
 # =========================
 # PHYPhox
 # =========================
-def start_measurement():
-    r = requests.get(f"{PHYPHOX_BASE_URL}/control?cmd=start", timeout=5)
+def start_measurement(base_url):
+    r = requests.get(f"{base_url}/control?cmd=start", timeout=5)
     r.raise_for_status()
 
 
-def stop_measurement():
-    r = requests.get(f"{PHYPHOX_BASE_URL}/control?cmd=stop", timeout=5)
+def stop_measurement(base_url):
+    r = requests.get(f"{base_url}/control?cmd=stop", timeout=5)
     r.raise_for_status()
 
 
-def clear_measurement():
-    r = requests.get(f"{PHYPHOX_BASE_URL}/control?cmd=clear", timeout=5)
+def clear_measurement(base_url):
+    r = requests.get(f"{base_url}/control?cmd=clear", timeout=5)
     r.raise_for_status()
 
 
-def get_full_buffers():
+def get_full_buffers(base_url):
     url = (
-        f"{PHYPHOX_BASE_URL}/get?"
+        f"{base_url}/get?"
         "acc_time=full&accX=full&accY=full&accZ=full&"
         "gyro_time=full&gyroX=full&gyroY=full&gyroZ=full"
     )
@@ -122,14 +122,14 @@ def predict_from_feature_df(df):
 # =========================
 # FLUJO PRINCIPAL
 # =========================
-def run_test():
+def run_test(base_url):
 
-    clear_measurement()
-    start_measurement()
+    clear_measurement(base_url)
+    start_measurement(base_url)
     print(f"Midiendo hasta {TARGET_SAMPLES} muestras...")
 
     while True:
-        buffers, status = get_full_buffers()
+        buffers, status = get_full_buffers(base_url)
 
         acc_n = len(buffers["accX"]["buffer"])
         gyro_n = len(buffers["gyroX"]["buffer"])
@@ -147,9 +147,9 @@ def run_test():
         time.sleep(POLL_EVERY)
 
     print("\nParando medición...")
-    stop_measurement()
+    stop_measurement(base_url)
 
-    buffers, _ = get_full_buffers()
+    buffers, _ = get_full_buffers(base_url)
 
     # recorte exacto a 1500 por si una lectura se pasó
     for key in ["acc_time", "accX", "accY", "accZ", "gyro_time", "gyroX", "gyroY", "gyroZ"]:
@@ -190,7 +190,10 @@ def run_test():
 
 
 if __name__ == "__main__":
-    run_test()
+    base_url = input("Introduce la URL de Phyphox: ").strip()
+    if not base_url.startswith("http://") and not base_url.startswith("https://"):
+        base_url = f"http://{base_url}"
+    run_test(base_url)
 
 def _safe_mag(x, y, z):
     x = np.asarray(x, dtype=float)
@@ -202,8 +205,8 @@ def _safe_mag(x, y, z):
     return np.sqrt(x[:n]**2 + y[:n]**2 + z[:n]**2)
 
 
-def get_live_preview(preview_len=80):
-    buffers, status = get_full_buffers()
+def get_live_preview(base_url, preview_len=80):
+    buffers, status = get_full_buffers(base_url)
 
     acc_mag = _safe_mag(
         buffers["accX"]["buffer"],
@@ -235,9 +238,9 @@ def get_live_preview(preview_len=80):
     }
 
 
-def finalize_live_test():
-    stop_measurement()
-    buffers, _ = get_full_buffers()
+def finalize_live_test(base_url):
+    stop_measurement(base_url)
+    buffers, _ = get_full_buffers(base_url)
 
     for key in [
         "acc_time", "accX", "accY", "accZ",

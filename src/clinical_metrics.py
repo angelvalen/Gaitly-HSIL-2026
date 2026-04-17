@@ -105,11 +105,11 @@ class ClinicalMetricsEngine:
         idx_eficiencia = cls.calculate_energy_efficiency(wavelets)
         idx_fatiga = cls.calculate_dynamic_fatigue(tendencia_m)
 
-        estado_tendencia = "Estable"
+        estado_tendencia = "Stable"
         if tendencia_m > 3.0:
-            estado_tendencia = "Alerta: Deterioro Acelerado"
+            estado_tendencia = "Warning: Fast Deterioration"
         elif tendencia_m < -1.0:
-            estado_tendencia = "Mejora / Respuesta Positiva"
+            estado_tendencia = "Improvemet / Positive Response"
 
         # 4. JSON Maestro para el Frontend
         return {

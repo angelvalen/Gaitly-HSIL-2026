@@ -175,7 +175,15 @@ def test():
         
         
         # Obtener resultados
-        results = run_test()
+        base_url = request.form.get("phyphox_url", "").strip()
+        if not base_url:
+            flash("You must provide the Phyphox URL.")
+            return redirect("/test")
+
+        if not base_url.startswith("http://") and not base_url.startswith("https://"):
+            base_url = f"http://{base_url}"
+
+        results = run_test(base_url)
         date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         user_id = session["user_id"]
 
@@ -199,7 +207,7 @@ def test():
                 regularidad_paso_pct,
                 suavidad_mecanica_pct,
                 eficiencia_energetica_pct,
-                fatiga_dinamica_pct
+                fatiga_dinamica_ptc
             )
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """, (
@@ -239,18 +247,45 @@ def test():
 
 @app.post("/api/live-start")
 def api_live_start():
+    if "user_id" not in session:
+        return jsonify({"ok": False, "error": "Usuario no autenticado"}), 401
+
     try:
-        clear_measurement()
-        start_measurement()
-        return jsonify({"ok": True})
+        data = request.get_json(silent=True) or {}
+        base_url = (data.get("phyphox_url") or "").strip()
+
+        if not base_url:
+            return jsonify({"ok": False, "error": "Debes introducir la URL de Phyphox"}), 400
+
+        if not base_url.startswith("http://") and not base_url.startswith("https://"):
+            base_url = f"http://{base_url}"
+
+        session["phyphox_base_url"] = base_url
+
+        clear_measurement(base_url)
+        start_measurement(base_url)
+
+        return jsonify({"ok": True, "phyphox_base_url": base_url})
     except Exception as e:
         return jsonify({"ok": False, "error": str(e)}), 500
-
 
 @app.get("/api/live-preview")
 def api_live_preview():
     try:
-        payload = get_live_preview()
+        base_url = session.get("phyphox_base_url")
+        if not base_url:
+            return jsonify({
+                "measuring": False,
+                "acc_samples": 0,
+                "gyro_samples": 0,
+                "fs_est": "--",
+                "labels": [],
+                "acc_mag": [],
+                "gyr_mag": [],
+                "message": "Phyphox URL no configurada"
+            }), 400
+
+        payload = get_live_preview(base_url)
         return jsonify(payload)
     except Exception as e:
         return jsonify({
@@ -271,7 +306,11 @@ def api_live_finish():
         return jsonify({"ok": False, "error": "User not autenticated"}), 401
 
     try:
-        result = finalize_live_test()
+        base_url = session.get("phyphox_base_url")
+        if not base_url:
+            return jsonify({"ok": False, "error": "Phyphox URL no configurada"}), 400
+
+        result = finalize_live_test(base_url)
 
         date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         user_id = session["user_id"]
