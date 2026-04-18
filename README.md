@@ -1,6 +1,6 @@
 # CIPN Gait Analyzer
 
-**This project was buiild during the Harvard University HSIL Hackathon 2026 in Madrid.**
+**This project was built during the Harvard University HSIL Hackathon 2026 in Madrid.**
 
 Web application for live smartphone-based gait acquisition and AI-assisted analysis of chemotherapy-induced peripheral neuropathy (CIPN) risk.
 
