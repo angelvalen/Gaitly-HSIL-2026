@@ -25,61 +25,103 @@
 
     <div class="metrics-detailed-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-bottom: 2rem;">
         
-        <section class="card">
+        {% if metrics and metrics|length > 0 %}
+        {% set m = metrics[0] %}
+
+        <!-- Gait Quality & Efficiency -->
+        <section class="card"> 
             <div class="card-header">
                 <span class="label" style="color: var(--accent-blue);">Gait Quality & Efficiency</span>
             </div>
             <div class="detailed-metrics-list">
                 <div class="detail-item">
-                    <span>Mechanical Smoothness</span> <span class="val">{{ metrics[0]['suavidad_mecanica_pct'] | round(1) }} <small>%</small></span>
+                    <span>Mechanical Smoothness</span> 
+                    <span class="val">{{ m['suavidad_mecanica_pct'] | round(1) }} <small>%</small></span>
                 </div>
                 <hr style="border: 0; border-top: 1px solid var(--border-subtle); margin: 10px 0;">
                 <div class="detail-item">
-                    <span>Energy Efficiency</span> <span class="val">{{ metrics[0]['eficiencia_energetica_pct'] | round(1) }} <small>%</small></span>
+                    <span>Energy Efficiency</span> 
+                    <span class="val">{{ m['eficiencia_energetica_pct'] | round(1) }} <small>%</small></span>
                 </div>
                 <div class="detail-item">
-                    <span>Dynamic Fatigue</span> <span class="val" style="color: {% if metrics[0]['fatiga_dinamica_pct'] > 20 %}var(--warning){% else %}inherit{% endif %};">
-                        {{ metrics[0]['fatiga_dinamica_pct'] | round(1) }} <small>%</small>
+                    <span>Dynamic Fatigue</span> 
+                    <span class="val" style="color: {% if m['fatiga_dinamica_pct'] > 20 %}var(--warning){% else %}inherit{% endif %};">
+                        {{ m['fatiga_dinamica_pct'] | round(1) }} <small>%</small>
                     </span>
                 </div>
             </div>
         </section>
 
+        <!-- Stability & Coordination -->
         <section class="card">
             <div class="card-header">
                 <span class="label" style="color: var(--warning);">Stability & Coordination</span>
             </div>
             <div class="detailed-metrics-list">
                 <div class="detail-item">
-                    <span>Motor Control Index</span> <span class="val">{{ metrics[0]['control_motor'] | round(1) }} <small>%</small></span>
+                    <span>Motor Control Index</span> 
+                    <span class="val">{{ m['control_motor'] | round(1) }} <small>%</small></span>
                 </div>
                 <hr style="border: 0; border-top: 1px solid var(--border-subtle); margin: 10px 0;">
                 <div class="detail-item">
-                    <span>Step Regularity</span> <span class="val">{{ metrics[0]['regularidad_paso_pct'] | round(1) }} <small>%</small></span>
+                    <span>Step Regularity</span> 
+                    <span class="val">{{ m['regularidad_paso_pct'] | round(1) }} <small>%</small></span>
                 </div>
                 <div class="detail-item">
-                    <span>Gait Complexity (Chaos)</span> <span class="val">{{ metrics[0]['ritmo_caos'] | round(2) }}</span>
+                    <span>Gait Complexity (Chaos)</span> 
+                    <span class="val">{{ m['ritmo_caos'] | round(2) }}</span>
                 </div>
             </div>
         </section>
 
+        <!-- Neurological Signs -->
         <section class="card">
             <div class="card-header">
                 <span class="label" style="color: var(--alert);">Neurological Signs</span>
             </div>
             <div class="detailed-metrics-list">
                 <div class="detail-item">
-                    <span>Micro-Tremor Level</span> <span class="val">{{ metrics[0]['micro_temblor'] | round(3) }}</span>
+                    <span>Micro-Tremor Level</span> 
+                    <span class="val">{{ m['micro_temblor'] | round(3) }}</span>
                 </div>
                 <hr style="border: 0; border-top: 1px solid var(--border-subtle); margin: 10px 0;">
                 <div class="detail-item">
-                    <span>Gait Signal Entropy</span> <span class="val">{{ metrics[0]['spectral_entropy'] | round(2) }}</span>
+                    <span>Gait Signal Entropy</span> 
+                    <span class="val">{{ m['spectral_entropy'] | round(2) }}</span>
                 </div>
                 <div class="detail-item">
-                    <span>Evolutionary Status</span> <span class="val" style="font-size: 0.9rem; font-weight: 600;">{{ metrics[0]['estado_evolutivo'] }}</span>
+                    <span>Evolutionary Status</span> 
+                    <span class="val" style="font-size: 0.9rem; font-weight: 600;">
+                        {{ m['estado_evolutivo'] }}
+                    </span>
                 </div>
             </div>
         </section>
+
+    {% else %}
+
+        <section class="card">
+            <div class="card-header">
+                <span class="label">Gait Quality & Efficiency</span>
+            </div>
+            <p>No data available yet.</p>
+        </section>
+
+        <section class="card">
+            <div class="card-header">
+                <span class="label">Stability & Coordination</span>
+            </div>
+            <p>No data available yet.</p>
+        </section>
+
+        <section class="card">
+            <div class="card-header">
+                <span class="label">Neurological Signs</span>
+            </div>
+            <p>No data available yet.</p>
+        </section>
+
+    {% endif %}
     </div>
 </div>
 
