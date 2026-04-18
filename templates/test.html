@@ -293,14 +293,32 @@ async function apiFinish() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' }
     });
-    if (!res.ok) throw new Error('No se pudo finalizar el análisis');
-    return await res.json();
+    
+    const data = await res.json();
+    
+    // Throw the actual error message sent from Flask
+    if (!res.ok || !data.ok) {
+        throw new Error(data.error || 'No se pudo finalizar el análisis');
+    }
+    return data;
 }
 
+let isFinished = false;  // Stops DOM updates after 30s
+let isFetching = false;  // Prevents overlapping requests
+
 function startPolling() {
+    isFinished = false;
+    
+    // Increased to 500ms to allow requests to finish without stacking
     pollingInterval = setInterval(async () => {
+        if (isFinished || isFetching) return; 
+        isFetching = true;
+
         try {
             const payload = await apiPreview();
+            
+            // If the 30 seconds passed while we were waiting for the fetch, don't update the UI
+            if (isFinished) return;
 
             if (accCount) accCount.textContent = payload.acc_samples ?? 0;
             if (gyroCount) gyroCount.textContent = payload.gyro_samples ?? 0;
@@ -324,15 +342,15 @@ function startPolling() {
                 liveChart.update('none');
             }
         } catch (err) {
+            if (isFinished) return;
             if (streamState) {
                 streamState.textContent = 'Error';
                 streamState.className = 'metric-status status-alert';
             }
-            if (liveStatusText) {
-                liveStatusText.textContent = 'No se ha podido actualizar la señal en vivo.';
-            }
+        } finally {
+            isFetching = false;
         }
-    }, 100);
+    }, 500); 
 }
 
 async function runLiveCapture() {
@@ -341,19 +359,30 @@ async function runLiveCapture() {
 
     if (!liveChart) initLiveChart();
 
-    await apiStart();
+    try {
+        await apiStart();
+    } catch (err) {
+        alert("Error starting capture: " + err.message);
+        return;
+    }
+    
     startCountdown(30);
     startPolling();
 
     setTimeout(async () => {
+        isFinished = true; // CRITICAL: Stop all polling UI updates
+        clearInterval(pollingInterval);
+        clearInterval(countdownInterval);
+
+        if (liveStatusText) {
+            liveStatusText.textContent = 'Finalizando adquisición y ejecutando inferencia...';
+        }
+        if (streamState) {
+            streamState.textContent = 'Processing...';
+            streamState.className = 'metric-status status-normal';
+        }
+
         try {
-            clearInterval(pollingInterval);
-            clearInterval(countdownInterval);
-
-            if (liveStatusText) {
-                liveStatusText.textContent = 'Finalizando adquisición y ejecutando inferencia...';
-            }
-
             const result = await apiFinish();
 
             if (result.redirect_url) {
@@ -362,12 +391,14 @@ async function runLiveCapture() {
                 window.location.href = '/';
             }
         } catch (err) {
+            console.error(err);
             if (streamState) {
                 streamState.textContent = 'Failed';
                 streamState.className = 'metric-status status-alert';
             }
             if (liveStatusText) {
-                liveStatusText.textContent = 'Error en el análisis final.';
+                // Now you will actually see the Python error on screen!
+                liveStatusText.textContent = `Error: ${err.message}`;
             }
         }
     }, 30000);

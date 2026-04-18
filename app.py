@@ -207,7 +207,7 @@ def test():
                 regularidad_paso_pct,
                 suavidad_mecanica_pct,
                 eficiencia_energetica_pct,
-                fatiga_dinamica_ptc
+                fatiga_dinamica_pct
             )
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """, (
